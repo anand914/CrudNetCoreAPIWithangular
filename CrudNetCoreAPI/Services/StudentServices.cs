@@ -115,6 +115,25 @@ namespace CrudNetCoreAPI.Services
             }
         }
 
+        public async Task<ApiResponse> GetCourse()
+        {
+            try
+            {
+                var result = await _context.Courses.ToListAsync();
+                return new ApiResponse()
+                {
+                    StatusCode = 200,
+                    Status = true,
+                    Data = result,
+                    Errors = null
+                };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task<ApiResponse> GetStudent(int id)
         {
             try
@@ -147,6 +166,50 @@ namespace CrudNetCoreAPI.Services
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        public async Task<ApiResponse> Search(string name)
+        {
+            try
+            {
+                var result = await _context.Students
+                    .Include(s => s.Course) // Assuming you have a Course navigation property in your Student entity
+                    .FirstOrDefaultAsync(x => x.FirstName.ToLower() == name.ToLower());
+
+                if (result != null)
+                {
+                    var studentVM = new StudentVM
+                    {
+                        StudentId = result.StudentId,
+                        FirstName = result.FirstName,
+                        LastName = result.LastName,
+                        Address = result.Address,
+                        DOB = result.DOB, // Format DOB as needed
+                        CourseId = result.CourseId,
+                        CourseName = result.Course?.Course_Name // Assuming Course has a CourseName property
+                    };
+
+                    return new ApiResponse
+                    {
+                        StatusCode = 200,
+                        Status = true,
+                        Data = studentVM,
+                        Errors = null
+                    };
+                }
+
+                return new ApiResponse
+                {
+                    StatusCode = 404,
+                    Status = false,
+                    Data = null,
+                    Errors = new List<string> { "Student not found." }
+                };
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
 

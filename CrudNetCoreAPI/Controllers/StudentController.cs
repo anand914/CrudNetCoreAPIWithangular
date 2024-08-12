@@ -103,5 +103,25 @@ namespace CrudNetCoreAPI.Controllers
                 throw ex;
             }
         }
+        [HttpPost]
+        public async Task<IActionResult>Serach(string name)
+        {
+            try
+            {
+                var data = await _srvc.Search(name);
+                if (data != null)
+                {
+                    return Ok(data);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ;
+            }
+        }
     }
 }
